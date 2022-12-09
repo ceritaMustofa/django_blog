@@ -1,3 +1,5 @@
+from turtle import title
+from urllib import response
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -31,12 +33,14 @@ class BlogTest(TestCase):
     def test_url_exists_at_correct_location_detailview(self):
         response = self.client.get("/post/test-post-title/")
         self.assertEqual(response.status_code, 200)
-    def test_post_listview(self): # new
+        
+    def test_post_listview(self): 
         response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Test post body")
         self.assertTemplateUsed(response, "home.html")
-    def test_post_detailview(self): # new
+        
+    def test_post_detailview(self): 
         response = self.client.get(reverse("post_detail",
         kwargs={"slug": self.post.slug}))
         no_response = self.client.get("/post/third-post/")
@@ -44,3 +48,31 @@ class BlogTest(TestCase):
         self.assertEqual(no_response.status_code, 404)
         self.assertContains(response, "Test post title")
         self.assertTemplateUsed(response, "post_detail.html")
+        
+    def test_post_createview(self):
+        response = self.client.post(
+            reverse("add_post"),
+            {
+                "title":"New post",
+                "body":"New body",
+                "author":self.user.id,
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Post.objects.last().title, "New post")
+        self.assertEqual(Post.objects.last().body, "New body")
+    def test_post_updateview(self): # new
+        response = self.client.post(
+        reverse("edit_post", kwargs={"slug":self.post.slug}),
+            {
+            "title": "Updated title",
+            "body": "Updated text",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Post.objects.last().title, "Updated title")
+        self.assertEqual(Post.objects.last().body, "Updated text")
+    
+    def test_post_deleteview(self): # new
+        response = self.client.post(reverse("delete_post", kwargs={"slug":self.post.slug}))
+        self.assertEqual(response.status_code, 302)

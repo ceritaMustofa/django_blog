@@ -9,9 +9,22 @@
         <link href="{% static '/css/styles.css' %}" rel="stylesheet" />
     </head>
     <body>
-        <header>
-            <h1><a href="{% url 'home' %}">Django blog</a></h1>
-        </header>
-        <div>{% block content %} {% endblock content %}</div>
+        <div>
+            <header>
+                <h1><a href="{% url 'home' %}">Django blog</a></h1>
+
+                <div class="nav-right">
+                    <a href="{% url 'add_post' %}">+ New Post</a>
+                </div>
+            </header>
+            {% if user.is_authenticated %}
+            <p>Hi {{ user.username }}!</p>
+            <p><a href="{% url 'logout' %}">Log out</a></p>
+            {% else %}
+            <p>You are not logged in.</p>
+            <a href="{% url 'login' %}">Log In</a> |
+            <a href="{% url 'signup' %}">Sign Up</a>
+            {% endif %} {% block content %} {% endblock content %}
+        </div>
     </body>
 </html>
